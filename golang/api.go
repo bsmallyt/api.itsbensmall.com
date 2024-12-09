@@ -8,8 +8,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os/exec"
-	//"os"
-	//"time"
 )
 
 //CREATES A UNIQUE 40 digit ID, sperated by dashes, for every request
@@ -36,7 +34,7 @@ func spellcheck(w http.ResponseWriter, r *http.Request, requestID string) {
   } else {
 		
 		//line specific to directory
-		cmd := exec.Command("/usr/api.itsbensmall.com/checker.exe", word)
+		cmd := exec.Command("/usr/api.itsbensmall.com/spellcheck-cpp/checker.exe", word)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 
