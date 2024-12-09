@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -37,7 +36,7 @@ func spellcheck(w http.ResponseWriter, r *http.Request, requestID string) {
   } else {
 		
 		//line specific to directory
-		cmd := exec.Command("/usr/api.itsbensmall.com/checker.exe", word)
+		cmd := exec.Command("./checker.exe", word)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 
@@ -79,7 +78,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", handler)
 
-	port := ":8090"
+	port := ":90"
 	println("Server running on http://localhost" + port)
 	if err := http.ListenAndServe(port, nil); err != nil {
 		panic(err)
