@@ -36,7 +36,7 @@ func spellcheck(w http.ResponseWriter, r *http.Request, requestID string) {
   } else {
 		
 		//line specific to directory
-		cmd := exec.Command("./checker.exe", word)
+		cmd := exec.Command("/usr/api.itsbensmall.com/checker.exe", word)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 
