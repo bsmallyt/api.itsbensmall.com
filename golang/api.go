@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os/exec"
+	"os"
 )
 
 //CREATES A UNIQUE 40 digit ID, sperated by dashes, for every request
@@ -34,7 +35,7 @@ func spellcheck(w http.ResponseWriter, r *http.Request, requestID string) {
   } else {
 		
 		//line specific to directory
-		cmd := exec.Command("/usr/api.itsbensmall.com/spellcheck-cpp/checker.exe", word)
+		cmd := exec.Command("./checker.exe", word)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 
@@ -66,7 +67,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
   switch val := r.URL.Query().Get("val"); val {
   case "spellcheck":
+		os.Chdir("/usr/api.itsbensmall.com/spellcheck-cpp")
     spellcheck(w, r, requestID)
+		os.Chdir("/usr/api.itsbensmall.com/golang")
   default:
     http.Error(w, `{"error": "Invalid or missing 'val' parameter"}`, http.StatusBadRequest)
   }
