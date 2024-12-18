@@ -22,7 +22,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		os.Chdir("/usr/api.itsbensmall.com/main")
 	case "reload":
 		os.Chdir("/usr/api.itsbensmall.com/reload")
-		reload.Fitsbensmall()
+		reload.Fitsbensmall(w, r)
 		os.Chdir("/usr/api.itsbensmall.com/main")
   default:
     http.Error(w, `{"error": "Invalid or missing 'val' parameter"}`, http.StatusBadRequest)
