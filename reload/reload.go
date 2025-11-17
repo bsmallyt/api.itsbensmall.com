@@ -3,48 +3,50 @@ package reload
 import (
 	"net/http"
 	"os/exec"
+	"log"
+	"io"
 )
 
+func run(w http.ResponseWriter, cmd *exec.Cmd, errmsg string) bool {
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Println("ERROR:", errmsg)
+		log.Println(string(output))
+		http.Error(w, `{"error": "`+errmsg+`"}`, http.StatusInternalServerError)
+		return false
+	}
+	return true
+}
+
 func Fitsbensmall(w http.ResponseWriter, r *http.Request) {
+
 	cmd := exec.Command("sh", "-c", "supervisorctl stop apache")
-	cmd.Path = "/"
-	err := cmd.Run()
-	if err != nil {
-		http.Error(w, `{"error": "unable to stop apache service"}`, http.StatusInternalServerError)
-	}
+	cmd.Dir = "/"
+	if !run(w, cmd, "unable to stop apache service") { return }
+
 	cmd = exec.Command("sh", "-c", "pkill apache2")
-	err = cmd.Run()
-	if err != nil {
-		http.Error(w, `{"error": "unable to kill apache service"}`, http.StatusInternalServerError)
-	}
-	cmd = exec.Command("sh", "-c", "rm -r usr/itsbensmall.com")
-	err = cmd.Run()
-	if err != nil {
-		http.Error(w, `{"error": "unable to remove files"}`, http.StatusInternalServerError)
-	}
-	
+	cmd.Dir = "/"
+	run(w, cmd, "unable to kill apache service")
+
+	cmd = exec.Command("sh", "-c", "rm -rf /usr/itsbensmall.com")
+	cmd.Dir = "/"
+	if !run(w, cmd, "unable to remove files") { return }
+
 	cmd = exec.Command("sh", "-c", "git clone https://github.com/bsmallyt/itsbensmall.com.git")
-	cmd.Path = "/usr"
-	err = cmd.Run()
-	if err != nil {
-		http.Error(w, `{"error": "unable to clone site"}`, http.StatusInternalServerError)
-	}
-	cmd = exec.Command("sh", "-c", "ng build itsbensmall")
-	cmd.Path = "/usr/itsbensmall.com"
-	err = cmd.Run()
-	if err != nil {
-		http.Error(w, `{"error": "unable to build site"}`, http.StatusInternalServerError)
-	}
+	cmd.Dir = "/usr"
+	if !run(w, cmd, "unable to clone site") { return }
+
+	cmd = exec.Command("sh", "-c", "npx ng build itsbensmall")
+	cmd.Dir = "/usr/itsbensmall.com"
+	if !run(w, cmd, "unable to build site") { return }
 
 	cmd = exec.Command("sh", "-c", "cp -r /usr/itsbensmall.com/dist/itsbensmall /var/www/html")
-	cmd.Path = "/"
-	err = cmd.Run()
-	if err != nil {
-		http.Error(w, `{"error": "unable to copy build"}`, http.StatusInternalServerError)
-	}
+	cmd.Dir = "/"
+	if !run(w, cmd, "unable to copy build") { return }
+
 	cmd = exec.Command("sh", "-c", "supervisorctl start apache")
-	err = cmd.Run()
-	if err != nil {
-		http.Error(w, `{"error": "unable to restart apache service"}`, http.StatusInternalServerError)
-	}
+	cmd.Dir = "/"
+	if !run(w, cmd, "unable to restart apache service") { return }
+
+	io.WriteString(w, `{"status": "success"}`)
 }
