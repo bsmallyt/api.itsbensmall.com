@@ -24,7 +24,7 @@ func Fitsbensmall(w http.ResponseWriter, r *http.Request) {
 	cmd.Dir = "/"
 	if !run(w, cmd, "unable to stop apache service") { return }
 
-	cmd = exec.Command("sh", "-c", "pkill apache2")
+	cmd = exec.Command("sh", "-c", "pkill -f apache2")
 	cmd.Dir = "/"
 	run(w, cmd, "unable to kill apache service")
 
